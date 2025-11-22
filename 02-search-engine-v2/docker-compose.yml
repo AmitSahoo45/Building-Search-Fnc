@@ -1,0 +1,28 @@
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.1
+    container_name: es-node
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false # Disabling security for easier local learning
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m" # Cap memory usage so it doesn't eat your RAM
+    ports:
+      - "9200:9200" # The port we send requests to
+    networks:
+      - search-net
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.1
+    container_name: kibana-dashboard
+    ports:
+      - "5601:5601" # The port for the visual dashboard
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+    networks:
+      - search-net
+
+networks:
+  search-net:
+    driver: bridge
