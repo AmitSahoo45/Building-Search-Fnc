@@ -1,7 +1,11 @@
 package com.learning.news_search;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/news")
@@ -12,14 +16,24 @@ public class NewsController {
         this.service = service;
     }
 
+    @GetMapping("/hello")
+    public String hello() {
+        return "Search Engine is Online!";
+    }
+
     @PostMapping("/load")
     public String loadData() {
         service.loadDataFromJson();
         return "Data loading triggered! Check the console for details.";
     }
 
-    @GetMapping("/hello")
-    public String hello() {
-        return "Search Engine is Online!";
+    @GetMapping("/search")
+    public Page<NewsArticle> searchArticles(@RequestParam String keyword, Pageable pageable) {
+        return service.searchArticles(keyword, pageable);
+    }
+
+    @GetMapping("/searchAgg")
+    public SearchResponse searchWithAggregations(@RequestParam String keyword, Pageable pageable) {
+        return service.searchWithAggregations(keyword, pageable);
     }
 }
