@@ -10,14 +10,18 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
 
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregate;
 import co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionBoostMode;
+import co.elastic.clients.elasticsearch._types.query_dsl.FieldValueFactorModifier;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregation;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.core.SearchHit;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,17 +74,35 @@ public class NewsService {
     public SearchResponse searchWithAggregations(String keyword, Pageable pageable) {
         Query query = NativeQuery.builder()
                 .withQuery(q -> q
-                        .multiMatch(m -> m
-                                .fields("headline^3", "shortDescription")
-                                .query(keyword)
-                        ))
+//                        .multiMatch(m -> m
+//                                .fields("headline^3", "shortDescription")
+//                                .query(keyword)
+//                        ))
+                        .functionScore(fs -> fs
+                                .query(mq -> mq
+                                        .multiMatch(m -> m
+                                                .fields("headline^3", "shortDescription").query(keyword)
+                                        )
+                                )
+                                .functions(f -> f
+                                        .fieldValueFactor(fv -> fv
+                                                .field("clickCount")
+                                                .modifier(FieldValueFactorModifier.Log1p) // <-- Use Log1p modifier
+                                                .factor(1.0) // multiplier for the result
+                                                .missing(0.0) // treat null counts as 0
+                                        )
+                                )
+                                // Sum adds the boost to the base score
+                                .boostMode(FunctionBoostMode.Multiply)
+                        )
+                )
                 .withPageable(pageable)
                 .withAggregation("categories", co.elastic.clients.elasticsearch._types.aggregations.Aggregation.of(a -> a
                         .terms(t -> t.field("category").size(10))
                 ))
                 .build();
 
-        SearchHits<NewsArticle> searchHits = elasticsearchOperations.search(query, NewsArticle.class);
+        SearchHits<NewsArticle> searchHits = elasticsearchOperations.search(query, NewsArticle.class) ;
 
         // 1. Extract Articles
         List<NewsArticle> articles = new ArrayList<>();
@@ -111,5 +133,17 @@ public class NewsService {
         }
 
         return new SearchResponse(articles, categoryCounts);
+    }
+
+    public void incrementClickCount(String id) {
+        try {
+            NewsArticle article = repository.findById(id).orElse(null);
+            if (article != null) {
+                article.setClickCount(article.getClickCount() + 1);
+                repository.save(article);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

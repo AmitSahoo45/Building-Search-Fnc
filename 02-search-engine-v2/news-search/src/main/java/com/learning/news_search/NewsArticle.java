@@ -30,6 +30,9 @@ public class NewsArticle {
     @Field(type = FieldType.Date, format = {}, pattern = "yyyy-MM-dd")
     private LocalDate date;
 
+    @Field(type = FieldType.Integer)
+    private Integer clickCount = 0;
+
     public NewsArticle() {
     }
 
@@ -40,6 +43,7 @@ public class NewsArticle {
         this.link = link;
         this.short_description = short_description;
         this.date = date;
+        this.clickCount = 0;
     }
 
     // Getters and Setters
@@ -51,6 +55,8 @@ public class NewsArticle {
         this.id = id;
     }
 
+    // ------------------------------
+
     public String getCategory() {
         return category;
     }
@@ -58,6 +64,8 @@ public class NewsArticle {
     public void setCategory(String category) {
         this.category = category;
     }
+
+    // ------------------------------
 
     public String getHeadline() {
         return headline;
@@ -67,6 +75,8 @@ public class NewsArticle {
         this.headline = headline;
     }
 
+    // ------------------------------
+
     public String getAuthors() {
         return authors;
     }
@@ -74,6 +84,8 @@ public class NewsArticle {
     public void setAuthors(String authors) {
         this.authors = authors;
     }
+
+    // ------------------------------
 
     public String getLink() {
         return link;
@@ -83,6 +95,8 @@ public class NewsArticle {
         this.link = link;
     }
 
+    // ------------------------------
+
     public String getShort_description() {
         return short_description;
     }
@@ -91,11 +105,23 @@ public class NewsArticle {
         this.short_description = short_description;
     }
 
+    // ------------------------------
+
     public LocalDate getDate() {
         return date;
     }
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    /// ------------------------------
+
+    public Integer getClickCount() {
+        return clickCount;
+    }
+
+    public void setClickCount(Integer clickCount) {
+        this.clickCount = clickCount;
     }
 }

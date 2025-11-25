@@ -36,4 +36,9 @@ public class NewsController {
     public SearchResponse searchWithAggregations(@RequestParam String keyword, Pageable pageable) {
         return service.searchWithAggregations(keyword, pageable);
     }
+
+    @PostMapping("/click/{id}")
+    public void incrementClickCount(@PathVariable String id) {
+        service.incrementClickCount(id);
+    }
 }
