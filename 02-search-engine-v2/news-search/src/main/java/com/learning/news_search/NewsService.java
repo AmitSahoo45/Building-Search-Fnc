@@ -93,7 +93,7 @@ public class NewsService {
                                         )
                                 )
                                 // Sum adds the boost to the base score
-                                .boostMode(FunctionBoostMode.Multiply)
+                                .boostMode(FunctionBoostMode.Sum)
                         )
                 )
                 .withPageable(pageable)
